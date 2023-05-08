@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "BizHawk": {
+      "commandName": "Executable",
+      "executablePath": "$(MSBuildProjectDirectory)\\BizHawk\\EmuHawk.exe",
+      "commandLineArgs": "--open-ext-tool-dll=FailingTool",
+      "workingDirectory": "$(MSBuildProjectDirectory)\\BizHawk"
+    }
+  }
+}

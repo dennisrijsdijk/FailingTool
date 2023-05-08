@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<LangVersion>10.0</LangVersion>
+		<Nullable>enable</Nullable>
+		<TargetFramework>net48</TargetFramework>
+		<AssemblyName>FailingTool</AssemblyName>
+		<RootNamespace>FailingTool</RootNamespace>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(BIZHAWK_DATA_HOME)' == '' ">
+		<BIZHAWK_DATA_HOME>$(ProjectDir)BizHawk/</BIZHAWK_DATA_HOME><!-- if building EmuHawk from source, point to $(ProjectDir)../BizHawk/output/ -->
+	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Update="MainForm">
+	    <SubType>Form</SubType>
+	  </Compile>
+	  <Compile Update="Properties\Settings.Designer.cs">
+	    <DesignTimeSharedInput>True</DesignTimeSharedInput>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Settings.settings</DependentUpon>
+	  </Compile>
+	  <Compile Remove="BizHawk\**" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+		<PackageReference Include="WebSocketSharp" Version="1.0.3-rc11" />
+		<Reference Include="System.Windows.Forms" />
+		<Reference Include="BizHawk.Client.Common" HintPath="$(BIZHAWK_DATA_HOME)dll/BizHawk.Client.Common.dll" />
+		<Reference Include="BizHawk.Client.EmuHawk" HintPath="$(BIZHAWK_DATA_HOME)EmuHawk.exe" />
+		<Reference Include="BizHawk.Common" HintPath="$(BIZHAWK_DATA_HOME)dll/BizHawk.Common.dll" />
+		<Reference Include="BizHawk.WinForms.Controls" HintPath="$(BIZHAWK_DATA_HOME)dll/BizHawk.WinForms.Controls.dll" />
+		<Reference Include="BizHawk.Emulation.Common" HintPath="$(BIZHAWK_DATA_HOME)dll/BizHawk.Emulation.Common.dll" />
+		<Reference Include="BizHawk.BizWare.BizWareGL" HintPath="$(BIZHAWK_DATA_HOME)dll/BizHawk.BizWare.BizWareGL.dll" />
+	</ItemGroup>
+	<ItemGroup>
+	  <EmbeddedResource Remove="BizHawk\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="BizHawk\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Update="Properties\Settings.settings">
+	    <Generator>SettingsSingleFileGenerator</Generator>
+	    <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+	  </None>
+	</ItemGroup>
+	<Target Name="DownloadBizHawk" AfterTargets="Restore" BeforeTargets="Build" Condition="!Exists('$(BIZHAWK_DATA_HOME)EmuHawk.exe')">
+		<MakeDir Directories="$(BIZHAWK_DATA_HOME)" />
+		<DownloadFile SourceUrl="https://github.com/TASEmulators/BizHawk/releases/download/2.9.1/BizHawk-2.9.1-win-x64.zip" DestinationFileName="bizhawk.zip" DestinationFolder=".\" />
+		<Unzip DestinationFolder="$(BIZHAWK_DATA_HOME)" SourceFiles="bizhawk.zip" />
+		<Delete Files="bizhawk.zip" />
+	</Target>
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(BIZHAWK_DATA_HOME)ExternalTools" />
+		<!-- Include any DLLs here that aren't already present in BizHawk. -->
+		<Copy SourceFiles="$(OutputPath)websocket-sharp.dll" DestinationFolder="$(BIZHAWK_DATA_HOME)ExternalTools\bin" />
+	</Target>
+</Project>
